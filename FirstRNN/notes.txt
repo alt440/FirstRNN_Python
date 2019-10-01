@@ -1,0 +1,69 @@
+(This project will contain some knowledge that I acquired in the previous neural network that I did, my first CNN, which
+is currently on my github)
+Backpropagation using an RNN is not that different from CNNs. The only difference is that we multiply by a time component,
+which for now, I have no idea what it is. In RNNs, the backpropagation is called "backpropagation through time", or bptt.
+
+I will be following a more simple tutorial from :
+https://www.analyticsvidhya.com/blog/2019/01/fundamentals-deep-learning-recurrent-neural-networks-scratch-python/
+and then I can try doing:
+http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-2-implementing-a-language-model-rnn-with-python-numpy-and-theano/
+
+So in the first tutorial I will be doing, I will be predicting the next result of a sine wave.
+
+We will have 50 values received from a sine wave and our algorithm will have to predict the 51st value of that sine wave.
+
+
+FORWARD PASS:
+The RNNForwardPassExplained explains pretty much what happens in the RNN Forward Pass, so I will explain other details.
+
+For each forward pass, only one value in the new_input variable is set. The others are reset to 0.
+So, when multiplying new_input with U we get a 1x100 matrix. There will be a value for each of the coordinates in that
+matrix, which will be the new_input non-zero value multiplied by one whole column of the U matrix. So, the resulting
+matrix is simply:
+mulu =
+[ new_input[t] * U[0][t],
+  new_input[t] * U[1][t], ... ]
+
+For the first pass, mulu = add because mulw = 0 (prev_s is set as all 0 to begin with)
+For the first pass, s is simply the sigmoid of the matrix mulu described above. It will get stored in prev_s for the
+next iteration.
+
+Now the mulv value is a full matrix multiplication (there are no zeros in both matrices).
+
+I am currently looking at a theoretical explanation of RNNs. This is what I have:
+https://towardsdatascience.com/illustrated-guide-to-recurrent-neural-networks-79e5eb8049c9
+
+And I can tell that his RNN is supposed to base its hidden layer with all of the previous inputs. However, this example
+RNN only uses the previous activation values and not any of the ones before it... Look at prev_s: After an iteration,
+its content BECOMES s, but is not slightly modified by s. LOOK AT PARAGRAPH THAT STARTS WITH: "I get explained that : "
+
+It is said that an issue with RNN is its short-term memory, because the latest values have more impact than the rest of
+the lot. The last input has way more impact (or weight) than the first one. The last input will greater affect the result
+than the first input.
+
+This is because of the vanishing gradient problem. The gradient that we want to apply holds a greater value for the
+last layers, and gets smaller and smaller the furthest it goes from the output layer.
+
+"You should use LSTM’s or GRU’s when you expect to model longer sequences with long-term dependencies."
+
+Following to this link:
+https://iamtrask.github.io/2015/11/15/anyone-can-code-lstm/?source=post_page-----79e5eb8049c9----------------------
+
+I get explained that :
+"Memory means that the hidden layer is a combination of your input data at the current timestep and the hidden layer of
+the previous timestep." - which explains why my RNN multiplies some weights by the activation values of the previous
+time step. His colored example helped me to understand how the memory works using only the previous hidden layer result.
+We can see that the previous hidden layer result will contain the results of all our previous results, even if I directly
+assign s in the code.
+--> s is the addition of the current input and the previous activation values. So, overtime, we get previous activation
+of 1 compounding to value of previous activation of 2 compounding to value of previous activation... and so on.
+s = sigmoid(mulu + np.dot(W, prev_s), where prev_s = s at timestep -1, which is a result of timestep -1, timestep -2 and
+so on.
+
+"The core difference in BPTT versus backprop is that the backpropagation step is done for all the time steps in the RNN
+layer. So if our sequence length is 50, we will backpropagate for all the timesteps previous to the current timestep."
+-https://www.analyticsvidhya.com/blog/2019/01/fundamentals-deep-learning-recurrent-neural-networks-scratch-python/
+
+Here is a source on BPTT:
+http://www.wildml.com/2015/10/recurrent-neural-networks-tutorial-part-3-backpropagation-through-time-and-vanishing-gradients/
+
